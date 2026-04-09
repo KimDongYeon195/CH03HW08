@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -18,9 +17,21 @@ public:
 	ABaseItem();
 
 protected:
-	virtual void OnItemOverlap(AActor* OverlapActor) override;
+	
+	virtual void OnItemOverlap(
+		UPrimitiveComponent* OverlappedComp, 
+		AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, 
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult) override;
 
-	virtual void OnItemEndOverlap(AActor* OverlapActor) override; 
+	
+	virtual void OnItemEndOverlap(
+		UPrimitiveComponent* OverlappedComp, 
+		AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, 
+		int32 OtherBodyIndex) override;
 
 	virtual void ActivateItem(AActor* Activator) override;
 
@@ -31,9 +42,15 @@ protected:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Item");
 	FName ItemType;
 
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Item|Component");
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Item|Component");
+	USceneComponent* Scene;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Item|Component");
+	USphereComponent* Collision;
 	
-
-
-
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "Item|Component");
+	UStaticMeshComponent* StaticMesh;
+	
+	
+	
 };

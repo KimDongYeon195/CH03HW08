@@ -12,7 +12,9 @@ ABigCoinItem::ABigCoinItem()
 //BigCoin을 획득하면 코인이 사라짐
 void ABigCoinItem::ActivateItem(AActor* Activator)
 { 
-	DestroyItem(); //BaseItem.h의 DestroyItem()함수 호출
+	//DestroyItem(); //BaseItem.h의 DestroyItem()함수 호출
+	Super::ActivateItem(Activator);
+		//추후 BigCoin만의 행동을 추가하고자 하면 여기에 입력
 }
 
 

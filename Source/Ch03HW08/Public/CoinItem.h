@@ -16,4 +16,6 @@ public:
 protected:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category ="Item");
 	int32 PointValue;//코인 획득 점수
+
+	virtual void ActivateItem(AActor* Activator) override;
 };

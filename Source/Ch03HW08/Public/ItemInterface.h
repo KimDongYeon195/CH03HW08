@@ -23,11 +23,23 @@ public:
 	//지뢰 힐링 코인
 	//힐링 코인 -> 즉시 발동(오버랩 직후)
 
-	virtual void OnItemOverlap(AActor* OverlapActor) = 0; 
+	UFUNCTION()
+	virtual void OnItemOverlap(
+		UPrimitiveComponent* OverlappedComp, //콜리전하는 본인컴포넌트(아이템)
+		AActor* OtherActor, //콜리전하는 상대액터(플레이어)
+		UPrimitiveComponent* OtherComp, //이 액터에 있는 충돌원인 액터(여기는 캡슐컴포넌트)
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult) = 0;
 	//아이템 범위 in
 	//매개변수자료형을 왜 AActor? -> 오버랩이 사람이 될 수도, 드론, 몬스터, 펫;... 많으니까 가장큰 범위를 가져다 놓고 그떄그때 캐스팅만 해서 호출
 	
-	virtual void OnItemEndOverlap(AActor* OverlapActor) = 0; //아이템 범위 out
+	UFUNCTION()
+	virtual void OnItemEndOverlap(
+		UPrimitiveComponent* OverlappedComp, //콜리전하는 본인컴포넌트(아이템)
+		AActor* OtherActor, //콜리전하는 상대액터(플레이어)
+		UPrimitiveComponent* OtherComp, //이 액터에 있는 충돌원인 액터(여기는 캡슐컴포넌트)
+		int32 OtherBodyIndex) = 0; //아이템 범위 out
 	
 	virtual void ActivateItem(AActor* Activator) = 0;
 		//아이템 사용시
