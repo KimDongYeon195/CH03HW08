@@ -26,17 +26,8 @@ ASpartaCharacter::ASpartaCharacter()
 
     GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 
-}
-
-void ASpartaCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-void ASpartaCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+    MaxHealth = 100.f;
+    Health = MaxHealth;
 
 }
 
@@ -166,4 +157,41 @@ void ASpartaCharacter::StopSprint(const FInputActionValue& value)
     {
         GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
     }
+}
+
+float ASpartaCharacter::GetHealth() const 
+{
+    return Health;
+}
+
+void ASpartaCharacter::AddHealth(float Amount)
+{
+    // 체력을 회복시킴. 최대 체력을 초과하지 않도록 제한함
+    Health = FMath::Clamp(Health + Amount, 0.0f, MaxHealth);
+    UE_LOG(LogTemp, Log, TEXT("Health increased to: %f"), Health);
+}
+
+float ASpartaCharacter::TakeDamage(
+    float DamageAmount,  //입힌 데미지
+    struct FDamageEvent const& DamageEvent, //데미지 유형 
+    AController* EventInstigator, //누가 데미지를 입혔냐
+    AActor* DamageCauser //데미지 발생시킨 오브젝트(지뢰)
+) 
+{
+    float ActualDamage = Super:: TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+    Health = FMath::Clamp(Health - DamageAmount,0.0f,MaxHealth);
+    UE_LOG(LogTemp, Warning, TEXT("Health decreased to %f"), Health);
+
+    if (Health <= 0)
+    {
+        OnDeath();
+    }
+
+    return ActualDamage; // 실제 데미지(방어력, 데미지감소 디버프 등....)
+}
+
+void ASpartaCharacter::OnDeath()
+{
+    //게임종료 로직
 }

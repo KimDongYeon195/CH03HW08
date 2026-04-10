@@ -3,6 +3,7 @@
 
 #include "MineItem.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/Gameplaystatics.h"
 
 AMineItem::AMineItem()
 {
@@ -32,15 +33,17 @@ void AMineItem::Explode()
 	{
 		if (Actor && Actor->ActorHasTag("Player"))
 		{
-			GEngine->AddOnScreenDebugMessage(
-				-1, 
-				2.f, 
-				FColor::Red, 
-				FString::Printf(TEXT("Player damaged %d by Mine!"), Explosiondamage));
+			UGameplayStatics::ApplyDamage(
+				Actor, //데미지 받은 액터
+				Explosiondamage, //데미지 양
+				nullptr, //데미지 유발 주체
+				this,//데미지 유발 오브젝트
+				UDamageType::StaticClass() //기본데미지 유형
+			);
 		}
 	}
 
-	DestroyItem(); //-> 즉발형이 아니기 때문에 일단 보류
+	DestroyItem(); 
 	//지뢰를 사용했을때 로직 구현
 	//간단히 즉발형으로 할 수도 있다.
 	//지연시간, 폭발 범위등의 로직을 구현할 수도 있다.

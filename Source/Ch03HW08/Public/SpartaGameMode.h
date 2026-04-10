@@ -6,9 +6,7 @@
 #include "GameFramework/GameMode.h"
 #include "SpartaGameMode.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class CH03HW08_API ASpartaGameMode : public AGameMode
 {
