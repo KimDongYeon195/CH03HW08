@@ -4,6 +4,7 @@
 #include "MineItem.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/Gameplaystatics.h"
+#include "Particles/ParticleSystemComponent.h"
 
 AMineItem::AMineItem()
 {
@@ -16,16 +17,52 @@ AMineItem::AMineItem()
 	ExplosionRadius = 300.f;
 	Explosiondamage = 30;
 	ItemType = "Mine";
+	bHasExploded = false;
 
 }
 
 void AMineItem::ActivateItem(AActor* Activator)
 {
-	GetWorld()->GetTimerManager().SetTimer(ExplosionTimerHandle, this, &AMineItem::Explode, ExplosionDelay, false);
+	if (bHasExploded) return;
+
+	Super::ActivateItem(Activator);
+
+	GetWorld()->GetTimerManager().SetTimer(
+		ExplosionTimerHandle,
+		this,
+		&AMineItem::Explode,
+		ExplosionDelay,
+		false
+	);
+
+	bHasExploded = true;
 }
 
 void AMineItem::Explode()
 {
+	UParticleSystemComponent* Particle = nullptr;
+
+	if (ExplosionParticle)
+	{
+		Particle = UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			ExplosionParticle,
+			GetActorLocation(),
+			GetActorRotation(),
+			false
+		);
+	}
+
+
+	if (ExplosionSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			GetWorld(),
+			ExplosionSound,
+			GetActorLocation()
+		);
+	}
+
 	TArray<AActor*> OverlappingActors; //액터의 배열 생성
 	ExplosionCollision->GetOverlappingActors(OverlappingActors); //액터 배열에 
 
@@ -49,4 +86,21 @@ void AMineItem::Explode()
 	//지연시간, 폭발 범위등의 로직을 구현할 수도 있다.
 	//폭발 이펙트(파티클), 사운드도 구현 가능
 
+	if (Particle)
+	{
+		FTimerHandle DestroyParticleTimerHandle;
+		
+		GetWorld()->GetTimerManager().SetTimer(
+			DestroyParticleTimerHandle,
+			[Particle]()
+			{
+				if (Particle)
+				{
+					Particle->DestroyComponent();
+				}
+			},
+			2.0f,
+			false
+		);
+	}
 }

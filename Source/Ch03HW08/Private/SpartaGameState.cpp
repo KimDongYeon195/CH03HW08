@@ -1,8 +1,11 @@
 #include "SpartaGameState.h"
-#include "Kismet/GameplayStatics.h"
-#include "SpawnVolume.h"
 #include "SpartaGameInstance.h"
+#include "SpartaPlayerController.h"
+#include "SpawnVolume.h"
 #include "CoinItem.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/TextBlock.h"
+#include "Blueprint/UserWidget.h"
 
 ASpartaGameState::ASpartaGameState()
 {
@@ -10,7 +13,7 @@ ASpartaGameState::ASpartaGameState()
         //전체 카운트 초기화
     SpawnedCoinCount = 0;
     CollectedCoinCount = 0;
-    LevelDuration = 60.f;
+    LevelDuration = 30.f;
     CurrentLevelIndex = 0;
     MaxLevels = 3;
 }
@@ -19,7 +22,15 @@ void ASpartaGameState::BeginPlay()
 {
     Super::BeginPlay();
 
-    StartLevel();
+       StartLevel();
+
+    GetWorldTimerManager().SetTimer(
+        HUDUpdateTimerHandle,
+        this,
+        &ASpartaGameState::UpdateHUD,
+        0.1f,
+        true
+    );
 }
 
 int32 ASpartaGameState::GetScore() const
@@ -43,6 +54,13 @@ void ASpartaGameState::AddScore(int32 Amount)
 
 void ASpartaGameState::StartLevel()
 {
+    if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+    {
+        if (ASpartaPlayerController* SpartaPlayerController = Cast<ASpartaPlayerController>(PlayerController))
+        {
+            SpartaPlayerController->ShowGameHUD();
+        }
+    }
 
     if (UGameInstance* GameInstance = GetGameInstance())
     {
@@ -88,9 +106,7 @@ void ASpartaGameState::StartLevel()
         false
     );
 
-    UE_LOG(LogTemp, Warning, TEXT("Level %d Start!, Spawned %d coin"),
-        CurrentLevelIndex + 1,
-        SpawnedCoinCount);
+
 }
 
 void ASpartaGameState::OnLevelTimeUp()
@@ -119,7 +135,7 @@ void ASpartaGameState::EndLevel()
     // 타이머 해제
     GetWorldTimerManager().ClearTimer(LevelTimerHandle);
     // 다음 레벨 인덱스로
-    
+
 
     if (UGameInstance* GameInstance = GetGameInstance())
     {
@@ -129,31 +145,71 @@ void ASpartaGameState::EndLevel()
             AddScore(Score);
             CurrentLevelIndex++;
             SpartaGameInstance->CurrentLevelIndex = CurrentLevelIndex;
+
+            // 모든 레벨을 다 돌았다면 게임 오버 처리
+            if (CurrentLevelIndex >= MaxLevels)
+            {
+                OnGameOver();
+                return;
+            }
+
+            // 레벨 맵 이름이 있다면 해당 맵 불러오기
+            if (LevelMapNames.IsValidIndex(CurrentLevelIndex))
+            {
+                UGameplayStatics::OpenLevel(GetWorld(), LevelMapNames[CurrentLevelIndex]);
+            }
+            else
+            {
+                // 맵 이름이 없으면 게임오버
+                OnGameOver();
+            }
         }
-
-    }
-
-    // 모든 레벨을 다 돌았다면 게임 오버 처리
-    if (CurrentLevelIndex >= MaxLevels)
-    {
-        OnGameOver();
-        return;
-    }
-
-    // 레벨 맵 이름이 있다면 해당 맵 불러오기
-    if (LevelMapNames.IsValidIndex(CurrentLevelIndex))
-    {
-        UGameplayStatics::OpenLevel(GetWorld(), LevelMapNames[CurrentLevelIndex]);
-    }
-    else
-    {
-        // 맵 이름이 없으면 게임오버
-        OnGameOver();
     }
 }
 
 void ASpartaGameState::OnGameOver()
 {
-    UE_LOG(LogTemp, Warning, TEXT("Game Over!!"));
-    // 여기서 UI를 띄운다거나, 재시작 기능을 넣을 수도 있음
+    if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+    {
+        if (ASpartaPlayerController* SpartaPlayerController = Cast<ASpartaPlayerController>(PlayerController))
+        {
+            SpartaPlayerController->SetPause(true);
+            SpartaPlayerController->ShowMainMenu(true);
+        }
+    }
+}
+
+void ASpartaGameState::UpdateHUD()
+{
+    if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+    {
+        ASpartaPlayerController* SpartaPlayerController = Cast<ASpartaPlayerController>(PlayerController);
+        {
+            if (UUserWidget* HUDWidget = SpartaPlayerController->GetHUDWidget())
+            {
+                if (UTextBlock* TimeText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Time"))))
+                {
+                    float RemainingTime = GetWorldTimerManager().GetTimerRemaining(LevelTimerHandle);
+                    TimeText->SetText(FText::FromString(FString::Printf(TEXT("Time: %.1f"), RemainingTime)));
+                }
+
+                if (UTextBlock* ScoreText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Score"))))
+                {
+                    if (UGameInstance* GameInstance = GetGameInstance())
+                    {
+                        USpartaGameInstance* SpartaGameInstance = Cast<USpartaGameInstance>(GameInstance);
+                        if (SpartaGameInstance)
+                        {
+                            ScoreText->SetText(FText::FromString(FString::Printf(TEXT("Score: %d"), SpartaGameInstance->TotalScore)));
+                        }
+                    }
+                }
+
+                if (UTextBlock* LevelIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Level"))))
+                {
+                    LevelIndexText->SetText(FText::FromString(FString::Printf(TEXT("Level: %d"), CurrentLevelIndex + 1)));
+                }
+            }
+        }
+    }
 }

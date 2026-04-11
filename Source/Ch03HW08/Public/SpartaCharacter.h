@@ -7,6 +7,7 @@
 
 class USpringArmComponent; 
 class UCameraComponent; 
+class UWidgetComponent;
 struct FInputActionValue;
 
 
@@ -22,6 +23,8 @@ public:
 	USpringArmComponent* SpringArmComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	UWidgetComponent* OverheadWidget;
 
 	// 현재 체력을 가져오는 함수
 	UFUNCTION(BlueprintPure, Category = "Health")
@@ -32,6 +35,7 @@ public:
 
 protected:
 	
+	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION()
@@ -60,10 +64,6 @@ protected:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = " Health")
 	float Health;
 
-	//체력 0일때 호출(사망)
-	void OnDeath();
-
-
 	// 데미지 처리 함수 - 외부로부터 데미지를 받을 때 호출됨
 	// 또는 AActor의 TakeDamage()를 오버라이드
 	virtual float TakeDamage(
@@ -73,7 +73,9 @@ protected:
 		AActor* DamageCauser //데미지 발생시킨 오브젝트(지뢰)
 	) override;
 
-	
+	//체력 0일때 호출(사망)
+	void OnDeath();
+	void UpdateOverheadHP();
 
 private:
 

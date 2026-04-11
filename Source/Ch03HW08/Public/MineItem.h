@@ -15,6 +15,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item|Mine");
 	USphereComponent* ExplosionCollision;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Effects")
+	UParticleSystem* ExplosionParticle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Effects")
+	USoundBase* ExplosionSound;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mine");
 	int32 Explosiondamage;
 
@@ -24,6 +30,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mine");
 	float ExplosionRadius;
 
+	bool bHasExploded;
 	FTimerHandle ExplosionTimerHandle;
 
 	virtual void ActivateItem(AActor* Activator) override;

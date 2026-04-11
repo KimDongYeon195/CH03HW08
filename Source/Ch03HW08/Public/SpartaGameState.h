@@ -22,7 +22,7 @@ public:
     int32 SpawnedCoinCount;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Coin")
     int32 CollectedCoinCount;
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
     float LevelDuration;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
@@ -38,14 +38,14 @@ public:
 
     // 매 레벨이 끝나기 전까지 시간이 흐르도록 관리하는 타이머
     FTimerHandle LevelTimerHandle;
-    
+    FTimerHandle HUDUpdateTimerHandle;
+
     // 현재 점수를 읽는 함수
     UFUNCTION(BlueprintPure, Category = "Score")
     int32 GetScore() const;
     // 점수를 추가해주는 함수
     UFUNCTION(BlueprintCallable, Category = "Score")
     void AddScore(int32 Amount);
-
     // 게임이 완전히 끝났을 때 (모든 레벨 종료) 실행되는 함수
     UFUNCTION(BlueprintCallable, Category = "Level")
     void OnGameOver();
@@ -57,5 +57,6 @@ public:
     void OnCoinCollected();
     // 레벨을 강제 종료하고 다음 레벨로 이동
     void EndLevel();
+    void UpdateHUD();
 
 };
