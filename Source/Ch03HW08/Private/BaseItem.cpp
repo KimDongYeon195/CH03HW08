@@ -74,17 +74,35 @@ void ABaseItem::ActivateItem(AActor* Activator)
 		);
 	}
 
+	//if (Particle)
+	//{
+	//	FTimerHandle DestroyParticleTimerHandle;
+	//		
+	//	GetWorld()->GetTimerManager().SetTimer(
+	//		DestroyParticleTimerHandle,
+	//		[Particle]()
+	//		{
+	//			if (Particle)
+	//			{
+	//				Particle->DestroyComponent();
+	//			}
+	//		},
+	//		2.0f,
+	//		false
+	//	);
+	//}
 	if (Particle)
 	{
 		FTimerHandle DestroyParticleTimerHandle;
-	
+		TWeakObjectPtr<UParticleSystemComponent> WeakParticle = Particle;
+
 		GetWorld()->GetTimerManager().SetTimer(
 			DestroyParticleTimerHandle,
-			[Particle]()
+			[WeakParticle]()
 			{
-				if (Particle)
+				if (WeakParticle.IsValid())
 				{
-					Particle->DestroyComponent();
+					WeakParticle->DestroyComponent();
 				}
 			},
 			2.0f,

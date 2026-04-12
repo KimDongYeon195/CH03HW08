@@ -53,6 +53,8 @@ void AMineItem::Explode()
 		);
 	}
 
+	TArray<AActor*> OverlappingActors; //액터의 배열 생성
+	ExplosionCollision->GetOverlappingActors(OverlappingActors); 
 
 	if (ExplosionSound)
 	{
@@ -63,8 +65,6 @@ void AMineItem::Explode()
 		);
 	}
 
-	TArray<AActor*> OverlappingActors; //액터의 배열 생성
-	ExplosionCollision->GetOverlappingActors(OverlappingActors); //액터 배열에 
 
 	for (AActor* Actor : OverlappingActors)
 	{
@@ -81,22 +81,36 @@ void AMineItem::Explode()
 	}
 
 	DestroyItem(); 
-	//지뢰를 사용했을때 로직 구현
-	//간단히 즉발형으로 할 수도 있다.
-	//지연시간, 폭발 범위등의 로직을 구현할 수도 있다.
-	//폭발 이펙트(파티클), 사운드도 구현 가능
-
+	
+	//if (Particle)
+	//{
+	//	FTimerHandle DestroyParticleTimerHandle;
+	//			
+	//	GetWorld()->GetTimerManager().SetTimer(
+	//		DestroyParticleTimerHandle,
+	//		[Particle]()
+	//		{
+	//			if (Particle)
+	//			{
+	//				Particle->DestroyComponent();
+	//			}
+	//		},
+	//		2.0f,
+	//		false
+	//	);
+	//}
 	if (Particle)
 	{
 		FTimerHandle DestroyParticleTimerHandle;
-		
+		TWeakObjectPtr<UParticleSystemComponent> WeakParticle = Particle;
+
 		GetWorld()->GetTimerManager().SetTimer(
 			DestroyParticleTimerHandle,
-			[Particle]()
+			[WeakParticle]()
 			{
-				if (Particle)
+				if (WeakParticle.IsValid())
 				{
-					Particle->DestroyComponent();
+					WeakParticle->DestroyComponent();
 				}
 			},
 			2.0f,
