@@ -43,20 +43,26 @@ public:
     // 현재 점수를 읽는 함수
     UFUNCTION(BlueprintPure, Category = "Score")
     int32 GetScore() const;
+
     // 점수를 추가해주는 함수
     UFUNCTION(BlueprintCallable, Category = "Score")
     void AddScore(int32 Amount);
+    
     // 게임이 완전히 끝났을 때 (모든 레벨 종료) 실행되는 함수
     UFUNCTION(BlueprintCallable, Category = "Level")
     void OnGameOver();
 
     void StartLevel();
+    
     // 레벨 제한 시간이 만료되었을 때 호출
     void OnLevelTimeUp();
+    
     // 코인을 주웠을 때 호출
     void OnCoinCollected();
+    
     // 레벨을 강제 종료하고 다음 레벨로 이동
     void EndLevel();
+    
     void UpdateHUD();
 
 };
